@@ -13,3 +13,8 @@ target/
 ### Logs ###
 *.log
 hs_err_pid*
+
+### Frontend (Jest) ###
+node_modules/
+coverage/
+dist/

@@ -1,0 +1,15 @@
+{
+  "name": "microservicio2-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pruebas unitarias del JavaScript de las vistas del Cliente web (Microservicio2)",
+  "scripts": {
+    "test": "jest",
+    "test:ci": "jest --ci --coverage"
+  },
+  "devDependencies": {
+    "jest": "30.5.2",
+    "jest-environment-jsdom": "30.5.2",
+    "jquery": "3.7.1"
+  }
+}
