@@ -12,5 +12,9 @@
     "jest": "30.5.2",
     "jest-environment-jsdom": "30.5.2",
     "jquery": "3.7.1"
+  },
+  "overrides": {
+    "glob": "14.0.3",
+    "minimatch": "11.0.4"
   }
 }
