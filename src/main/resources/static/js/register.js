@@ -1,30 +1,30 @@
-$(document).ready(function(){
- 	
-		'use strict'
-	
-	  // Fetch all the forms we want to apply custom Bootstrap validation styles to
-	  const forms = document.querySelectorAll('.needs-validation')
-	
-	  // Loop over them and prevent submission
-	  Array.from(forms).forEach(form => {
-	    form.addEventListener('submit', event => {
-	      if (!form.checkValidity()) {
-	        event.preventDefault()
-	        event.stopPropagation()
-	      }
-	
-	      form.classList.add('was-validated')
-	    }, false)
-	  })
-});
+/** Evita enviar el registro si falta algún campo obligatorio. */
+function validarRegistro(event) {
+	event.preventDefault();
 
-function getRandomColor(){
-	const letras = '0123456789ABCDEF';
-	let color = '#';
-	for (let i = 0; i < 6; i++){
-		color += letras[Math.floor(Math.random() * 16)]
+	const formRegistro = document.getElementById('form-registro');
+	const nombre = document.getElementById('nombre').value;
+	const email = document.getElementById('email').value;
+	const password = document.getElementById('password').value;
+
+	if (!nombre || !email || !password) {
+		document.getElementById('mensaje-error').innerText = "Por favor complete todos los campos.";
+		return false;
 	}
-	
-	document.getElementById("imagenUsuario").value = color;
-	
+
+	formRegistro.submit();
+	return true;
+}
+
+function inicializarRegistro() {
+	const formRegistro = document.getElementById('form-registro');
+	if (formRegistro) {
+		formRegistro.addEventListener('submit', validarRegistro);
+	}
+}
+
+document.addEventListener("DOMContentLoaded", inicializarRegistro);
+
+if (typeof module !== "undefined" && module.exports) {
+	module.exports = { validarRegistro, inicializarRegistro };
 }

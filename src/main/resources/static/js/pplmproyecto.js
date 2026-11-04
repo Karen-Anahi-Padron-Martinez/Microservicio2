@@ -1,22 +1,30 @@
-document.addEventListener("DOMContentLoaded", function() {
-            var formRegistro = document.getElementById('form-registro');
+/** Aplica la validación visual de Bootstrap e impide enviar formularios inválidos. */
+function activarValidacionFormularios() {
+	const forms = document.querySelectorAll('.needs-validation');
+	Array.from(forms).forEach(form => {
+		form.addEventListener('submit', event => {
+			if (!form.checkValidity()) {
+				event.preventDefault();
+				event.stopPropagation();
+			}
+			form.classList.add('was-validated');
+		}, false);
+	});
+}
 
-            formRegistro.addEventListener('submit', function(event) {
-                event.preventDefault(); // Prevenir el envío del formulario para validar primero
+$(document).ready(activarValidacionFormularios);
 
-                var nombre = document.getElementById('nombre').value;
-                var email = document.getElementById('email').value;
-                var password = document.getElementById('password').value;
-                var mensajeError = document.getElementById('mensaje-error');
+/** Asigna al usuario un color de avatar aleatorio en formato #RRGGBB. */
+function getRandomColor() {
+	const letras = '0123456789ABCDEF';
+	let color = '#';
+	for (let i = 0; i < 6; i++) {
+		color += letras[Math.floor(Math.random() * 16)];
+	}
+	document.getElementById("imagenUsuario").value = color;
+	return color;
+}
 
-                // Verificar si algún campo está vacío
-                if (!nombre || !email || !password) {
-                    mensajeError.innerText = "Por favor complete todos los campos.";
-                    return;
-                }
-
-                // Si todos los campos están llenos, el formulario se envía
-                // Aquí podrías agregar más validaciones si es necesario
-                formRegistro.submit();
-            });
-            });
+if (typeof module !== "undefined" && module.exports) {
+	module.exports = { activarValidacionFormularios, getRandomColor };
+}
