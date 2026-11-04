@@ -1,0 +1,72 @@
+// Pipeline FRONTEND (JavaScript, CSS y plantillas del Cliente web): npm ci -> Jest -> SonarQube -> Quality Gate -> Build
+pipeline {
+    agent any
+
+    options {
+        timestamps()
+        timeout(time: 30, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '15'))
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('npm ci') {
+            steps {
+                nodejs(nodeJSInstallationName: 'NodeJS22') {
+                    sh 'node -v && npm -v'
+                    sh 'npm ci --no-audit --no-fund'
+                }
+            }
+        }
+
+        stage('Test con cobertura') {
+            steps {
+                nodejs(nodeJSInstallationName: 'NodeJS22') {
+                    // Jest + jsdom; genera coverage/lcov.info y falla si la cobertura baja de 80 %
+                    sh 'npm run test:ci'
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'coverage/**', allowEmptyArchive: true
+                }
+            }
+        }
+
+        stage('Análisis SonarQube') {
+            steps {
+                script {
+                    def scannerHome = tool 'SonarScanner'
+                    withSonarQubeEnv('sonar') {
+                        // Node en el PATH para el analizador de JavaScript de SonarQube
+                        nodejs(nodeJSInstallationName: 'NodeJS22') {
+                            sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectVersion=${env.BUILD_NUMBER}"
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 10, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                nodejs(nodeJSInstallationName: 'NodeJS22') {
+                    sh 'npm run build'
+                }
+                archiveArtifacts artifacts: 'dist/**', fingerprint: true
+            }
+        }
+    }
+}
