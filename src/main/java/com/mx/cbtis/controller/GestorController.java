@@ -31,6 +31,7 @@ public class GestorController {
 	private static final String VISTA_PROYECTO = "proyecto";
 	private static final String REDIRECT_INICIO = "redirect:/inicio";
 	private static final String REDIRECT_PROYECTO = "redirect:/proyecto";
+	private static final String API_ADD_TAREAS = "/addTareas";
 
 	private final RestTemplate restTemplate;
 	private final String apiBaseUrl;
@@ -178,7 +179,7 @@ public class GestorController {
 
 	@PostMapping("/saveTarea")
 	public ModelAndView setSaveTareas(@ModelAttribute Tareas tareas) {
-		restTemplate.postForEntity(url("/addTareas"), tareas, Integer.class);
+		restTemplate.postForEntity(url(API_ADD_TAREAS), tareas, Integer.class);
 		ModelAndView mav = new ModelAndView(REDIRECT_PROYECTO);
 		mav.addObject("id_proyecto", tareas.getId_proyecto());
 		return mav;
@@ -205,12 +206,12 @@ public class GestorController {
 
 	@PostMapping("/verificarTarea")
 	public ResponseEntity<Integer> verificarTarea(@RequestBody Tareas paramName) {
-		return restTemplate.postForEntity(url("/addTareas"), paramName, Integer.class);
+		return restTemplate.postForEntity(url(API_ADD_TAREAS), paramName, Integer.class);
 	}
 
 	@PostMapping("/cambiosTareas")
 	public ResponseEntity<Integer> cambiosTareas(@RequestBody Tareas paramDatos) {
-		return restTemplate.postForEntity(url("/addTareas"), paramDatos, Integer.class);
+		return restTemplate.postForEntity(url(API_ADD_TAREAS), paramDatos, Integer.class);
 	}
 
 	@PostMapping("/consultarTareas")
