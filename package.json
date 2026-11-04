@@ -5,7 +5,7 @@
   "description": "Pruebas unitarias del JavaScript de las vistas del Cliente web (Microservicio2)",
   "scripts": {
     "test": "jest",
-    "test:ci": "jest --ci --coverage",
+    "test:ci": "jest --ci --coverage --runInBand",
     "build": "node scripts/build-frontend.js"
   },
   "devDependencies": {
