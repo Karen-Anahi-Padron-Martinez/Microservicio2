@@ -1,4 +1,4 @@
-// Pipeline FRONTEND (JavaScript, CSS y plantillas del Cliente web): npm ci -> Jest -> SonarQube -> Quality Gate -> Build
+// Pipeline FRONTEND (JavaScript, CSS y plantillas del Cliente web): npm ci -> Jest -> SAST (Semgrep) -> SonarQube -> Quality Gate -> Build
 pipeline {
     agent any
 
@@ -16,6 +16,8 @@ pipeline {
                 retry(3) {
                     checkout scm
                 }
+                // Scripts de CI (Infraestructura-IaC) fuera del workspace analizado
+                dir("${env.WORKSPACE}@iac") { git url: 'https://github.com/Karen-Anahi-Padron-Martinez/Infraestructura-IaC.git', branch: 'main' }
             }
         }
 
@@ -38,6 +40,18 @@ pipeline {
             post {
                 always {
                     archiveArtifacts artifacts: 'coverage/**', allowEmptyArchive: true
+                }
+            }
+        }
+
+        stage('SAST (Semgrep)') {
+            steps {
+                // Falla solo con hallazgos ERROR; WARNING/INFO quedan en el reporte
+                sh 'bash "$WORKSPACE@iac/ci/semgrep.sh" src/main/resources p/javascript p/owasp-top-ten p/secrets'
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'semgrep.json, semgrep.sarif', allowEmptyArchive: true
                 }
             }
         }
