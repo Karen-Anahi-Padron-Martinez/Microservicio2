@@ -54,6 +54,14 @@ public class GestorController {
 		return new HttpEntity<>(headers);
 	}
 
+	/**
+	 * Reenvía solo el código y el cuerpo de la respuesta de la API. Devolver el ResponseEntity original
+	 * duplicaba "Transfer-Encoding: chunked" (HTTP inválido; k6 lo rechazaba) y filtraba los encabezados Vary de la API.
+	 */
+	private static <T> ResponseEntity<T> soloCuerpo(ResponseEntity<T> respuesta) {
+		return ResponseEntity.status(respuesta.getStatusCode()).body(respuesta.getBody());
+	}
+
 	/** La API puede responder sin cuerpo; en ese caso se devuelve una lista vacía en lugar de fallar. */
 	private static <T> List<T> aLista(T[] arreglo) {
 		return (arreglo == null) ? Collections.emptyList() : Arrays.asList(arreglo);
@@ -134,7 +142,7 @@ public class GestorController {
 
 	@PostMapping("/verificarLogin")
 	public ResponseEntity<Usuario> verificarUsuario(@RequestBody Usuario paramUser) {
-		return restTemplate.postForEntity(url("/getUsuarioLogin"), paramUser, Usuario.class);
+		return soloCuerpo(restTemplate.postForEntity(url("/getUsuarioLogin"), paramUser, Usuario.class));
 	}
 
 	@PostMapping("/consultarUsuarios")
@@ -206,12 +214,12 @@ public class GestorController {
 
 	@PostMapping("/verificarTarea")
 	public ResponseEntity<Integer> verificarTarea(@RequestBody Tareas paramName) {
-		return restTemplate.postForEntity(url(API_ADD_TAREAS), paramName, Integer.class);
+		return soloCuerpo(restTemplate.postForEntity(url(API_ADD_TAREAS), paramName, Integer.class));
 	}
 
 	@PostMapping("/cambiosTareas")
 	public ResponseEntity<Integer> cambiosTareas(@RequestBody Tareas paramDatos) {
-		return restTemplate.postForEntity(url(API_ADD_TAREAS), paramDatos, Integer.class);
+		return soloCuerpo(restTemplate.postForEntity(url(API_ADD_TAREAS), paramDatos, Integer.class));
 	}
 
 	@PostMapping("/consultarTareas")

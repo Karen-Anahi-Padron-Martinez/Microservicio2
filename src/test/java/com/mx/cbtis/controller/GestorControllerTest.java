@@ -12,6 +12,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.ExpectedCount;
@@ -171,6 +173,25 @@ class GestorControllerTest {
                         .content("{\"correo_electronico\":\"ana@example.com\",\"contrasena\":\"clave\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.nombre").value("Ana"));
+    }
+
+    @Test
+    void noSeReenvianLosEncabezadosDeLaApi() throws Exception {
+        // Regresión: reenviar el ResponseEntity de la API duplicaba Transfer-Encoding (HTTP inválido)
+        HttpHeaders deLaApi = new HttpHeaders();
+        deLaApi.add(HttpHeaders.TRANSFER_ENCODING, "chunked");
+        deLaApi.add(HttpHeaders.VARY, "Origin");
+        api.expect(requestTo(API + "/getUsuarioLogin"))
+                .andRespond(withSuccess("{\"nombre\":\"Ana\"}", JSON).headers(deLaApi));
+        api.expect(ExpectedCount.twice(), requestTo(API + "/addTareas"))
+                .andRespond(withSuccess("1", JSON).headers(deLaApi));
+
+        for (String ruta : new String[] {"/verificarLogin", "/verificarTarea", "/cambiosTareas"}) {
+            mockMvc.perform(post(ruta).contentType(JSON).content("{}"))
+                    .andExpect(status().isOk())
+                    .andExpect(header().doesNotExist(HttpHeaders.TRANSFER_ENCODING))
+                    .andExpect(header().doesNotExist(HttpHeaders.VARY));
+        }
     }
 
     @Test
